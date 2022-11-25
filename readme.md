@@ -63,6 +63,7 @@
 
 本应用仅作为学习和参考使用，您可以基于本项目进行二次开发和完善，实现自己的业务逻辑
 
+![image](https://user-images.githubusercontent.com/1209779/203957115-39c1c8d7-b444-4a0e-bc20-691fdf766eb5.png)
 
 
 </appdetail>
