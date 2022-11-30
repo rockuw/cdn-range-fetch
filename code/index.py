@@ -8,6 +8,7 @@ import requests
 import os
 
 ORIGIN = 'http://ali2upyunmaster.r.aicdn.com'
+HOST = 'downloadapk02.sdk.mobileztgame.com'
 
 def oss_client(context, bucket):
     creds = context.credentials
@@ -21,7 +22,7 @@ def oss_client(context, bucket):
     return client
 
 def file_get_size(path):
-    resp = requests.head(ORIGIN + path)
+    resp = requests.head(ORIGIN + path, headers={'Host': HOST})
     resp.raise_for_status()
     return int(resp.headers.get('content-length'))
 
@@ -29,7 +30,9 @@ def file_get_range(path, size, begin, end):
     logging.getLogger().info('file get {}, size: {}, range: [{}, {})'.format(path, size, begin, end))
     if end > size:
         end = size
-    resp = requests.get(ORIGIN + path, headers={'Range': 'bytes={}-{}'.format(begin, end-1)})
+    resp = requests.get(ORIGIN + path, headers={
+        'Host': HOST,
+        'Range': 'bytes={}-{}'.format(begin, end-1)})
     resp.raise_for_status()
     return resp.content
 
