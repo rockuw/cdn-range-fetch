@@ -3,23 +3,11 @@
 import logging
 import traceback
 import bottle
-import oss2
 import requests
 import os
 
 ORIGIN = 'http://ali2upyunmaster.r.aicdn.com'
 HOST = 'downloadapk02.sdk.mobileztgame.com'
-
-def oss_client(context, bucket):
-    creds = context.credentials
-    auth = oss2.StsAuth(creds.accessKeyId,
-                        creds.accessKeySecret, creds.securityToken)
-    internal = '-internal'
-    if os.getenv('LOCAL_DEBUG') != "":
-        internal = ''
-    endpoint = 'oss-{}{}.aliyuncs.com'.format(context.region, internal)
-    client = oss2.Bucket(auth, endpoint, bucket)
-    return client
 
 def file_get_size(path):
     resp = requests.head(ORIGIN + path, headers={'Host': HOST})
@@ -85,14 +73,15 @@ def get_range_part(request):
     if pos is None:
         pos = size - remove
     else:
-        pos = int(pos)
+        pos = int(pos) - remove
     if pos < 0 or pos > size:
         raise Exception('invalid pos: {}'.format(pos))
 
     res = b''
     pa = pos + len(append)
-
     delta = len(append) - remove
+    logger.info('pos: {}, remove: {}, append size: {}, delta: {}'.format(pos, remove, len(append), delta))
+
     if begin < pos: # part left
         res += file_get_range(path, size, begin, min(end, pos))
     if end > pos: # part middle
