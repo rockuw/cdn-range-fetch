@@ -27,10 +27,13 @@ def parse_range(r):
     parts = r.split('=')
     if len(parts) != 2:
         raise Exception('invalid range: {}'.format(r))
-    parts = parts[1].split('-')
-    if len(parts) != 2:
+    rg = parts[1].split('-')
+    if len(rg) != 2:
         raise Exception('invalid range: {}'.format(r))
-    return int(parts[0]), int(parts[1]) + 1
+    if rg[1] == '' and rg[0] != '':
+        return int(rg[0]), None
+
+    return int(rg[0]), int(rg[1]) + 1
 
 def parse_path(path):
     parts = path.split('/')
@@ -64,6 +67,8 @@ def get_range_part(request):
     meta = client.get_object_meta(object)
     size = meta.content_length
     new_size = size - remove + len(append)
+    if end is None or end > new_size:
+        end = new_size
     bottle.response.set_header('Content-Range', 'bytes {}-{}/{}'.format(begin, end-1, new_size))
     bottle.response.set_header('Content-Lengh', end-begin)
 
