@@ -65,6 +65,7 @@
 
 ![image](https://user-images.githubusercontent.com/1209779/203957115-39c1c8d7-b444-4a0e-bc20-691fdf766eb5.png)
 
+![image](https://user-images.githubusercontent.com/1209779/204692995-b1747dc8-9400-4202-a979-3352db831928.png)
 
 </appdetail>
 
