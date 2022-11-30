@@ -4,7 +4,10 @@ import logging
 import traceback
 import bottle
 import oss2
+import requests
 import os
+
+ORIGIN = 'http://ali2upyunmaster.r.aicdn.com'
 
 def oss_client(context, bucket):
     creds = context.credentials
@@ -17,11 +20,18 @@ def oss_client(context, bucket):
     client = oss2.Bucket(auth, endpoint, bucket)
     return client
 
-def oss_get_range(client, object, size, begin, end):
-    logging.getLogger().info('oss get {}, size: {}, range: [{}, {})'.format(object, size, begin, end))
+def file_get_size(path):
+    resp = requests.head(ORIGIN + path)
+    resp.raise_for_status()
+    return int(resp.headers.get('content-length'))
+
+def file_get_range(path, size, begin, end):
+    logging.getLogger().info('file get {}, size: {}, range: [{}, {})'.format(path, size, begin, end))
     if end > size:
         end = size
-    return client.get_object(object, byte_range=[begin, end-1]).read()
+    resp = requests.get(ORIGIN + path, headers={'Range': 'bytes={}-{}'.format(begin, end-1)})
+    resp.raise_for_status()
+    return resp.content
 
 def parse_range(r):
     parts = r.split('=')
@@ -62,10 +72,7 @@ def get_range_part(request):
     begin, end = parse_range(rg) # [0, 10) not include 10
     context = request.environ.get('fc.context')
     path = request.path
-    bucket, object = parse_path(path)
-    client = oss_client(context, bucket)
-    meta = client.get_object_meta(object)
-    size = meta.content_length
+    size = file_get_size(path)
     new_size = size - remove + len(append)
     if end is None or end > new_size:
         end = new_size
@@ -84,7 +91,7 @@ def get_range_part(request):
 
     delta = len(append) - remove
     if begin < pos: # part left
-        res += oss_get_range(client, object, size, begin, min(end, pos))
+        res += file_get_range(path, size, begin, min(end, pos))
     if end > pos: # part middle
         start = max(begin, pos)-pos
         endx = min(end, pa)-pos
@@ -92,7 +99,7 @@ def get_range_part(request):
             logger.info('append size: {}, get range [{}, {})'.format(len(append), start, endx))
             res += append[start : endx]
     if end > pa: # part right
-        res += oss_get_range(client, object, size, max(begin, pa)-delta, end-delta)
+        res += file_get_range(path, size, max(begin, pa)-delta, end-delta)
 
     return res
 
