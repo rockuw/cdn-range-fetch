@@ -68,7 +68,7 @@ def get_range_part(request):
     if end is None or end > new_size:
         end = new_size
     bottle.response.set_header('Content-Range', 'bytes {}-{}/{}'.format(begin, end-1, new_size))
-    bottle.response.set_header('Content-Lengh', end-begin)
+    bottle.response.set_header('Content-Length', end-begin)
 
     if pos is None:
         pos = size - remove
