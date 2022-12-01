@@ -58,7 +58,7 @@ def get_range_part(request):
     if append is None:
         append = b''
     else:
-        append = bytes(append, 'ascii')
+        append = bytes(append, 'latin1')
 
     begin, end = parse_range(rg) # [0, 10) not include 10
     context = request.environ.get('fc.context')
