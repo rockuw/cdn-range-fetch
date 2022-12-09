@@ -51,7 +51,6 @@ def get_range_part(request):
     pos = request.query.get('pos')
     remove = request.query.get('remove')
     append = request.query.get('append')
-    logger.info('range: {}, pos: {}, remove: {}, append: {}, append size: {}'.format(rg, pos, remove, append, len(append)))
 
     if remove is None:
         remove = 0
@@ -61,6 +60,8 @@ def get_range_part(request):
         append = b''
     else:
         append = bytes(append, 'latin1')
+
+    logger.info('range: {}, pos: {}, remove: {}, append: {}, append size: {}'.format(rg, pos, remove, append, len(append)))
 
     begin, end = parse_range(rg) # [0, 10) not include 10
     context = request.environ.get('fc.context')
