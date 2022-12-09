@@ -12,6 +12,8 @@ HOST = 'downloadapk02.sdk.mobileztgame.com'
 def file_get_size(path):
     resp = requests.head(ORIGIN + path, headers={'Host': HOST})
     resp.raise_for_status()
+    bottle.response.content_type = resp.headers.get('content-type')
+    bottle.response.set_header('cache-control', resp.headers.get('cache-control'))
     return int(resp.headers.get('content-length'))
 
 def file_get_range(path, size, begin, end):
@@ -98,6 +100,7 @@ def get_range_part(request):
 @bottle.route('/<mypath:path>', method='GET')
 def index(mypath):
     try:
+        bottle.response.status = 206
         return get_range_part(bottle.request)
     except Exception as ex:
         bottle.response.content_type = 'text/plain'

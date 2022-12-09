@@ -45,10 +45,16 @@ def test():
         resp_old, url_old = req(OLD_URL, pos, remove, append, begin, end)
         resp_fc, url_fc = req(FC_URL, pos, remove, append, begin, end)
 
+        if resp_old.status_code != resp_fc.status_code:
+            raise Exception('status code not match: {}'.format([resp_old.status_code, resp_fc.status_code]))
+
+        if resp_old.headers.get('content-type') != resp_fc.headers.get('content-type'):
+            raise Exception('content-type not match: {}'.format([resp_old.headers.get('content-type'), resp_fc.headers.get('content-type')]))
+
         cr_old = resp_old.headers.get('content-range')
         cr_fc = resp_fc.headers.get('content-range')
         if cr_old != cr_fc:
-            raise Exception('content range not match: {}'.format([begin, end, cr_old, cr_fc, url_old, url_fc]))
+            raise Exception('content-range not match: {}'.format([begin, end, cr_old, cr_fc, url_old, url_fc]))
 
         if resp_old.content != resp_fc.content:
             raise Exception('content not match: {}'.format([begin, end, url_old, url_fc]))
