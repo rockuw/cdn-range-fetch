@@ -14,7 +14,7 @@ def file_get_size(path):
     resp.raise_for_status()
     bottle.response.content_type = resp.headers.get('content-type')
     bottle.response.set_header('cache-control', resp.headers.get('cache-control'))
-    return int(resp.headers.get('content-length'))
+    return resp, int(resp.headers.get('content-length'))
 
 def file_get_range(path, size, begin, end):
     logging.getLogger().info('file get {}, size: {}, range: [{}, {})'.format(path, size, begin, end))
@@ -69,7 +69,12 @@ def get_range_part(request):
     for k in ['pos', 'remove', 'append']:
         q.pop(k, None)
     path = request.path+'?'+urllib.parse.urlencode(q)
-    size = file_get_size(path)
+    resp, size = file_get_size(path)
+    if resp.status_code >= 300:
+        bottle.response.status = resp.status_code
+        for k, v in resp.headers.items():
+            bottle.response.set_header(k, v)
+        return
     new_size = size - remove + len(append)
     if end is None or end > new_size:
         end = new_size
