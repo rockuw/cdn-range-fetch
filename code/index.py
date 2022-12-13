@@ -4,7 +4,7 @@ import logging
 import traceback
 import bottle
 import requests
-import os
+import urllib
 
 ORIGIN = 'http://ali2upyunmaster.r.aicdn.com'
 HOST = 'downloadapk02.sdk.mobileztgame.com'
@@ -65,7 +65,10 @@ def get_range_part(request):
 
     begin, end = parse_range(rg) # [0, 10) not include 10
     context = request.environ.get('fc.context')
-    path = request.path
+    q = dict(request.query).copy()
+    for k in ['pos', 'remove', 'append']:
+        q.pop(k, None)
+    path = request.path+'?'+urllib.parse.urlencode(q)
     size = file_get_size(path)
     new_size = size - remove + len(append)
     if end is None or end > new_size:
